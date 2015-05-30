@@ -8,7 +8,7 @@
 #	Author: Bennie Haelen (http://www.benniehaelen.com)
 #	Date: 5/29/2015
 # =============================================================================
-param([string]$inputfileName, 
+param([string]$inputFileName, 
       [string]$outputFileName,
       [int]$records = 1000,
 	  [boolean]$skipFirstRecord = $true)
@@ -28,23 +28,28 @@ if (-Not ($outputFileName))
 	Throw "You must specify an output file name" 
 }
 
+# Get the full input and output paths
+$fullInputPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($inputFileName)
+$fullOutputPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($outputFileName)
+
 # Make sure that the input file exists
-if (-Not (Test-Path $inputFileName))
+if (-Not (Test-Path $fullInputPath))
 {
 	Throw "File $inputFileName does not exist!"
 	exit
 }
 
 # Remove the output file if it already exists
-if (Test-Path $outputFileName)
+if (Test-Path $fullOutputPath)
 {
-	Remove-Item $outputFileName
+	Remove-Item $fullOutputPath
 }
 
 try
 {
-	$reader = [System.IO.File]::OpenText($inputFileName)
-	$writer = New-Object System.IO.StreamWriter $outputFileName
+	
+	$reader = [System.IO.File]::OpenText($fullInputPath)
+	$writer = New-Object System.IO.StreamWriter($fullOutputPath)
 
 	# Skip over first line since it contains headers
 	$currentRecord = 0
